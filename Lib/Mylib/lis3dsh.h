@@ -57,10 +57,9 @@ uint8_t lis_send(uint8_t reg, uint8_t data, uint8_t mode);
 
 void lis3dh_show(void);
 
-/*
 void dma_tx_init(void);
 void dma_rx_init(void);
 void lis_dma_start(void);
-*/
+
 
 #endif

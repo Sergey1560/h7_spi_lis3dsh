@@ -4,10 +4,6 @@
 #include "log.h"
 #include "dwt.h"
 
-
-#include "SEGGER_SYSVIEW.h"
-
-
 //#define ENABLE_DCACHE 1
 
 #define CCMRAM __attribute__((section(".ccmram")))

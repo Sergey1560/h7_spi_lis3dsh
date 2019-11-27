@@ -28,7 +28,7 @@
 /* PLL3 */
 #define PLL_DIVR3 6
 #define PLL_DIVQ3 2
-#define PLL_DIVP3 32
+#define PLL_DIVP3 64
 #define PLL_DIVN3 24
 #define PLL_FRACN3 0
 

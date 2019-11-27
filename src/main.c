@@ -18,7 +18,7 @@ int main(void){
 	RCC_init();
 	
 	lis3dsh_init();
-	timer2_init();
+	//timer2_init();
 	while(1){
 	
 	};
