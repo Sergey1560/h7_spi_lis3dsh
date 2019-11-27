@@ -34,6 +34,14 @@ defined in linker script */
 Reset_Handler:  
   ldr   sp, =_estack      /* set stack pointer */
 
+  
+  ldr    r3, =0x58024400      /* enable SDRAM D2 D3 */
+  ldr.w  r3, [r3, #0xDC]
+  ldr    r2, =0x58024400      
+  orr    r3, r3, #0xE0000000
+  str.w  r3, [r2, #0xDC]
+  
+  
   ldr r0, =_estack
   sub r0, #4
   ldr r1, = _Min_Stack_Size
@@ -114,6 +122,22 @@ LoopCopyD2:
   cmp  r2, r3
   bcc  CopyD2
  
+/* COPY D3 */ 
+  movs  r1, #0
+  b  LoopCopyD3
+
+CopyD3:
+  ldr  r3, =_siram_d3
+  ldr  r3, [r3, r1]
+  str  r3, [r0, r1]
+  adds  r1, r1, #4
+    
+LoopCopyD3:
+  ldr  r0, =_sram_d3
+  ldr  r3, =_eram_d3
+  adds  r2, r0, r1
+  cmp  r2, r3
+  bcc  CopyD3
 
  /* Zero BSS */ 
   ldr  r2, =_sbss

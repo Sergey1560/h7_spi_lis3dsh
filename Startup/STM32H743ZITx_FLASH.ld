@@ -174,6 +174,21 @@ _siram_d2 = LOADADDR(.ram_d2);
     _eram_d2 = .;       /* create a global symbol at ccmram end */
   } >RAM_D2 AT> FLASH
 
+
+_siram_d3 = LOADADDR(.ram_d3);
+  .ram_d3 :
+  {
+    . = ALIGN(4);
+    _sram_d3 = .;       /* create a global symbol at ccmram start */
+    *(.ram_d3)
+    *(.ram_d3*)
+    
+    . = ALIGN(4);
+    _eram_d3 = .;       /* create a global symbol at ccmram end */
+  } >RAM_D3 AT> FLASH
+
+
+
 _siitcm = LOADADDR(.itcm);
   .itcm :
   {
