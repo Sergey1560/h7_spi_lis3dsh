@@ -52,15 +52,11 @@ struct accel_shift
 extern volatile struct accel_out acc;
 //extern volatile struct accel_shift acc_shift;
 
-
-
 void lis3dsh_init(void);
 uint8_t lis_send(uint8_t reg, uint8_t data, uint8_t mode);
-int16_t lis_get_x(void);
-int16_t lis_get_y(void);
-int16_t lis_get_z(void);
 
-uint16_t lis_read_16b(uint8_t reg);
+void lis3dh_show(void);
+
 /*
 void dma_tx_init(void);
 void dma_rx_init(void);

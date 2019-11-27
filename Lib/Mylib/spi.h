@@ -48,9 +48,9 @@
 
 
 
-void spi_gpio_init(void);
+void spi1_gpio_init(void);
 void spi_init(SPI_TypeDef* SPI);
-uint8_t spi_8breg(SPI_TypeDef* SPI,uint8_t reg, uint8_t data);
-uint16_t spi_16breg(SPI_TypeDef* SPI,uint8_t reg);
+//uint8_t spi_8breg(SPI_TypeDef* SPI,uint8_t reg, uint8_t data);
+void spi_transfer(SPI_TypeDef* SPI,uint8_t *out, uint8_t *in, uint8_t cnt);
 
 #endif

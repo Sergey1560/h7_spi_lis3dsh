@@ -3,32 +3,52 @@
 
 void spi_init(SPI_TypeDef* SPI){
     
-    spi_gpio_init();
-    //PLL1Q, 48Mhz
-    
-    RCC->D2CCIP1R |= (2 << RCC_D2CCIP1R_SPI123SEL_Pos);
-    RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
 
-    RCC->APB2RSTR |= RCC_APB2RSTR_SPI1RST;
-    for(uint32_t i=0; i<0x1000; i++){__NOP();}
-    RCC->APB2RSTR &= ~RCC_APB2RSTR_SPI1RST;
+    if(SPI == SPI1){
+        spi1_gpio_init();
+        //PLL1Q, 48Mhz
+        
+        RCC->D2CCIP1R |= (2 << RCC_D2CCIP1R_SPI123SEL_Pos);
+        RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
+
+        RCC->APB2RSTR |= RCC_APB2RSTR_SPI1RST;
+        for(uint32_t i=0; i<0x1000; i++){__NOP();}
+        RCC->APB2RSTR &= ~RCC_APB2RSTR_SPI1RST;
 
 
-    //SPI->CFG1 |= (7 << SPI_CFG1_MBR_Pos);//|(4 << SPI_CFG1_FTHLV_Pos);
-	SPI1->CFG2 |= SPI_CFG2_SSOE|\
-                  SPI_CFG2_CPOL|\
-                  SPI_CFG2_CPHA|\
-                  SPI_CFG2_AFCNTR|\
-                  SPI_CFG2_MASTER;
+        //SPI->CFG1 |= (7 << SPI_CFG1_MBR_Pos);//|(4 << SPI_CFG1_FTHLV_Pos);
+        SPI->CFG2 |= SPI_CFG2_SSOE|\
+                    SPI_CFG2_CPOL|\
+                    SPI_CFG2_CPHA|\
+                    SPI_CFG2_AFCNTR|\
+                    SPI_CFG2_MASTER;
 
-    SPI1->CR1 |= SPI_CR1_SPE;
+        SPI->CR1 |= SPI_CR1_SPE;
+    };
 }
 
 
+
+void spi_transfer(SPI_TypeDef* SPI,uint8_t *out, uint8_t *in, uint8_t cnt){
+
+   	SPI->CR2 = cnt;
+    SPI->CR1 |= SPI_CR1_CSTART;
+
+    for(uint8_t i=0; i<cnt; i++){
+        while((SPI->SR & SPI_SR_TXP) == 0){__NOP();};
+        SPI1_TXDR_8b = out[i];
+        while((SPI->SR & SPI_SR_RXP) == 0){__NOP();};
+        in[i]=SPI1_RXDR_8b;	
+    }
+    SPI->IFCR = SPI_IFCR_EOTC;
+}
+
+/*
 uint8_t spi_8breg(SPI_TypeDef* SPI,uint8_t reg, uint8_t data){
     uint8_t reply;
     
-	SPI->CR2 = 2;
+	
+    SPI->CR2 = 2;
     SPI->CR1 |= SPI_CR1_CSTART;
 
 	while((SPI->SR & SPI_SR_TXP) == 0){__NOP();};
@@ -45,49 +65,13 @@ uint8_t spi_8breg(SPI_TypeDef* SPI,uint8_t reg, uint8_t data){
     while((SPI->SR & SPI_SR_RXP) == 0){__NOP();};
     reply=SPI1_RXDR_8b;	
 
-    while(!(SPI->SR & SPI_SR_EOT)){__NOP();}
     SPI->IFCR = SPI_IFCR_EOTC;
 
     return reply;
 }
+*/
 
-
-uint16_t spi_16breg(SPI_TypeDef* SPI,uint8_t reg){
-    uint8_t b;
-    uint16_t reply;
-    
-	SPI->CR2 = 3;
-    SPI->CR1 |= SPI_CR1_CSTART;
-
-	while((SPI->SR & SPI_SR_TXP) == 0){__NOP();};
-    SPI1_TXDR_8b = reg;
-
-    while((SPI->SR & SPI_SR_RXP) == 0){__NOP();};
-    (void)SPI1_RXDR_8b;	
-    
-    while((SPI->SR & SPI_SR_TXP) == 0){__NOP();};
-    SPI1_TXDR_8b = reg+1;
-
-    while((SPI->SR & SPI_SR_RXP) == 0){__NOP();};
-    b=SPI1_RXDR_8b;	
-    reply = (b << 8);
-
-    while((SPI->SR & SPI_SR_TXP) == 0){__NOP();};
-    SPI1_TXDR_8b = 0xFF;
-
-    while((SPI->SR & SPI_SR_RXP) == 0){__NOP();};
-    b=SPI1_RXDR_8b;	
-    reply |= b;
-
-    SPI->IFCR = SPI_IFCR_EOTC;
-    return reply;
-}
-
-
-
-
-
-void spi_gpio_init(void){
+void spi1_gpio_init(void){
     /* SPI1
     PA4 - CS
     PA5 - SCK
@@ -120,18 +104,7 @@ void spi_gpio_init(void){
 					 (5 << GPIO_AFRL_AFRL7_Pos);
 
  	GPIOA->PUPDR |=  GPIO_PUPDR_PUPDR4_0;  
-    GPIOA->PUPDR &= ~GPIO_PUPDR_PUPDR5;   // Ensure all pull up pull down resistors are disabled
-    GPIOA->PUPDR &= ~GPIO_PUPDR_PUPDR6;   // Ensure all pull up pull down resistors are disabled
-    GPIOA->PUPDR &= ~GPIO_PUPDR_PUPDR7;
+    GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPDR5|GPIO_PUPDR_PUPDR6|GPIO_PUPDR_PUPDR7);
 
-/*
-    GPIOA->PUPDR |=  GPIO_PUPDR_PUPDR3_0;  
-    GPIOA->MODER &= ~(GPIO_MODER_MODER3);
-    GPIOA->MODER |= (GPIO_MODER_MODER3_0);
-    GPIOA->OTYPER &= ~(GPIO_OTYPER_OT_3);
-    GPIOA->OSPEEDR |= (S_VH << GPIO_OSPEEDER_OSPEEDR3_Pos);
-
-    PIN_UP;
-    */
 }
 
