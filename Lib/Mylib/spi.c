@@ -1,30 +1,31 @@
 #include "spi.h"
 
 
-void spi_init(SPI_TypeDef* SPI){
-    
-
+void spi_init(SPI_TypeDef* SPI, uint8_t enable_dma){
     if(SPI == SPI1){
         spi1_gpio_init();
-        //PLL1Q, 48Mhz
-        
+
+        // CLK from P3CLK, 6 Mhz 
         RCC->D2CCIP1R |= (2 << RCC_D2CCIP1R_SPI123SEL_Pos);
         RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
 
         RCC->APB2RSTR |= RCC_APB2RSTR_SPI1RST;
-        for(uint32_t i=0; i<0x1000; i++){__NOP();}
+        __NOP();
+        //for(uint32_t i=0; i<0x1000; i++){__NOP();}
         RCC->APB2RSTR &= ~RCC_APB2RSTR_SPI1RST;
 
-
-        //SPI->CFG1 |= (7 << SPI_CFG1_MBR_Pos);//|(4 << SPI_CFG1_FTHLV_Pos);
-        SPI->CFG2 |= SPI_CFG2_SSOE|\
-                    SPI_CFG2_CPOL|\
-                    SPI_CFG2_CPHA|\
-                    SPI_CFG2_AFCNTR|\
-                    SPI_CFG2_MASTER;
-
-        SPI->CR1 |= SPI_CR1_SPE;
     };
+    
+    SPI->CR1 = 0;
+    if(enable_dma){
+        SPI->CFG1 |= SPI_CFG1_RXDMAEN | SPI_CFG1_TXDMAEN;
+    }
+    SPI->CFG2 |= SPI_CFG2_SSOE|\
+                SPI_CFG2_CPOL|\
+                SPI_CFG2_CPHA|\
+                SPI_CFG2_AFCNTR|\
+                SPI_CFG2_MASTER;
+    SPI->CR1 |= SPI_CR1_SPE;
 }
 
 
@@ -42,34 +43,6 @@ void spi_transfer(SPI_TypeDef* SPI,uint8_t *out, uint8_t *in, uint8_t cnt){
     }
     SPI->IFCR = SPI_IFCR_EOTC;
 }
-
-/*
-uint8_t spi_8breg(SPI_TypeDef* SPI,uint8_t reg, uint8_t data){
-    uint8_t reply;
-    
-	
-    SPI->CR2 = 2;
-    SPI->CR1 |= SPI_CR1_CSTART;
-
-	while((SPI->SR & SPI_SR_TXP) == 0){__NOP();};
-    SPI1_TXDR_8b = reg;
-
-    while((SPI->SR & SPI_SR_RXP) == 0){__NOP();};
-    (void)SPI1_RXDR_8b;	
-
-
-    while((SPI->SR & SPI_SR_TXP) == 0){__NOP();};
-    SPI1_TXDR_8b = data;
-
-
-    while((SPI->SR & SPI_SR_RXP) == 0){__NOP();};
-    reply=SPI1_RXDR_8b;	
-
-    SPI->IFCR = SPI_IFCR_EOTC;
-
-    return reply;
-}
-*/
 
 void spi1_gpio_init(void){
     /* SPI1

@@ -4,12 +4,17 @@
 #include "common_defs.h"
 #include "spi.h"
 
+
+#define LIS3DH_ID   0x33
+#define LIS3DSH_ID  0x3F
+
 #define LIS_WRITE 0
 #define LIS_READ  1
 
 #define LIS_STATUS_27  0x27
-#define LIS_CTRL4_20  0x20
+#define LIS_CTRL4_20   0x20
 
+#define LIS_WHO_I_AM   0x0F
 
 #define LIS_ODR_OFF  		0
 #define LIS_ODR_3				1
@@ -32,6 +37,8 @@
 #define STATUS_Y_AV		(1 << 1)
 #define STATUS_Z_AV		(1 << 2)
 
+#define DMA_CLEAR_S5   (uint32_t)(DMA_HIFCR_CTCIF5|DMA_HIFCR_CHTIF5|DMA_HIFCR_CTEIF5|DMA_HIFCR_CFEIF5|DMA_HIFCR_CDMEIF5)
+#define DMA_CLEAR_S6   (uint32_t)(DMA_HIFCR_CTCIF6|DMA_HIFCR_CHTIF6|DMA_HIFCR_CTEIF6|DMA_HIFCR_CFEIF6|DMA_HIFCR_CDMEIF6)
 
 struct accel_out
 {    
@@ -55,11 +62,6 @@ extern volatile struct accel_out acc;
 void lis3dsh_init(void);
 uint8_t lis_send(uint8_t reg, uint8_t data, uint8_t mode);
 
-void lis3dh_show(void);
-
-void dma_tx_init(void);
-void dma_rx_init(void);
-void lis_dma_start(void);
-
+void lis3_start_dma(void);
 
 #endif
