@@ -11,7 +11,6 @@ void spi_init(SPI_TypeDef* SPI, uint8_t enable_dma){
 
         RCC->APB2RSTR |= RCC_APB2RSTR_SPI1RST;
         __NOP();
-        //for(uint32_t i=0; i<0x1000; i++){__NOP();}
         RCC->APB2RSTR &= ~RCC_APB2RSTR_SPI1RST;
 
     };

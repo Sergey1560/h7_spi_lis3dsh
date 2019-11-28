@@ -26,7 +26,7 @@ int main(void){
 }
 
 
-
+//Start dma 10 times/sec for data update
 void ITCM TIM2_IRQHandler(void)
 {
 	if(TIM2->SR & TIM_SR_UIF)	TIM2->SR &= ~TIM_SR_UIF; 
